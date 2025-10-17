@@ -1,0 +1,59 @@
+# Fly.io deployment configuration for v0-clone
+# See https://fly.io/docs/reference/configuration/ for documentation
+
+app = "v0-clone"
+primary_region = "iad"
+
+[build]
+  # Use Node.js buildpack
+  builder = "heroku/buildpacks:20"
+  
+[env]
+  PORT = "8080"
+  NODE_ENV = "production"
+
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+  
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 250
+    soft_limit = 200
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [[services.tcp_checks]]
+    grace_period = "10s"
+    interval = "15s"
+    restart_limit = 0
+    timeout = "2s"
+
+  [[services.http_checks]]
+    interval = "10s"
+    grace_period = "5s"
+    method = "get"
+    path = "/api/health"
+    protocol = "http"
+    restart_limit = 0
+    timeout = "2s"
+    tls_skip_verify = false
+
+# Secrets to set with `fly secrets set`:
+# - V0_API_KEY
+# - AUTH_SECRET
+# - POSTGRES_URL
+
+# To deploy:
+# 1. Install Fly CLI: https://fly.io/docs/hands-on/install-flyctl/
+# 2. Login: fly auth login
+# 3. Create app: fly launch --copy-config --name v0-clone
+# 4. Set secrets: fly secrets set V0_API_KEY=xxx AUTH_SECRET=xxx POSTGRES_URL=xxx
+# 5. Deploy: fly deploy
