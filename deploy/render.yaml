@@ -1,0 +1,60 @@
+# Render deployment configuration for v0-clone
+# See https://render.com/docs/blueprint-spec for documentation
+
+services:
+  - type: web
+    name: v0-clone
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: pnpm install && pnpm build
+    startCommand: pnpm start
+    healthCheckPath: /api/health
+    
+    envVars:
+      - key: NODE_ENV
+        value: production
+      
+      - key: V0_API_KEY
+        sync: false
+        # Set in Render dashboard or via render.yaml
+      
+      - key: AUTH_SECRET
+        generateValue: true
+        # Render will auto-generate a secure secret
+      
+      - key: POSTGRES_URL
+        fromDatabase:
+          name: v0-clone-db
+          property: connectionString
+    
+    domains:
+      - v0-clone.onrender.com
+    
+    autoDeploy: true
+
+databases:
+  - name: v0-clone-db
+    databaseName: v0_clone
+    user: v0_clone_user
+    plan: starter
+    region: oregon
+    postgresMajorVersion: 15
+
+# To deploy to Render:
+# 
+# Option 1: Via Dashboard
+# 1. Go to https://dashboard.render.com/
+# 2. Click "New +" and select "Blueprint"
+# 3. Connect your GitHub repository
+# 4. Select this render.yaml file
+# 5. Click "Apply" to create services
+# 6. Set V0_API_KEY in the environment variables
+#
+# Option 2: Via CLI (if available)
+# 1. Install Render CLI
+# 2. Run: render deploy
+#
+# The database will be automatically created and connected.
+# Make sure to run migrations after first deployment:
+# render run pnpm db:migrate

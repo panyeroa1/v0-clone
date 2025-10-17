@@ -170,12 +170,68 @@ When streaming is enabled:
 - Server returns a streaming response with `Content-Type: text/event-stream`
 - Frontend uses `StreamingMessage` component from `@v0-sdk/react` to render responses in real-time
 
+## Agentic Architecture
+
+This project includes an agentic system for autonomous development workflows:
+
+### Core Agents (`/agents/`)
+
+- **Planner** - Splits specifications into actionable tasks
+- **Coder** - Writes and edits code (UI/backend/infrastructure)
+- **Runner** - Executes dev server, tests, linting, and builds
+- **Critic** - Verifies diffs and suggests improvements
+- **Fixer** - Applies patches and loops until checks pass
+- **Publisher** - Builds artifacts, deploys, generates changelogs
+- **DB Steward** - Manages migrations, seeding, drift checks
+- **Archivist** - Tags releases, snapshots logs and artifacts
+
+### Task Management
+
+- **`task.md`** - Rolling log of development tasks with status tracking
+- Tasks are created by Planner and executed by other agents
+- Progress and completion are tracked in the log
+
+### Computer Use (`/playwright/`)
+
+Headless browser automation for testing and verification:
+
+- Browser sandbox with Playwright
+- Helpers for screenshots, traces, and snapshots
+- Permission gate for file writes, network access, and deployments
+- Traces saved to `/runs/YYYYMMDD_HHMMSS/`
+
+### One-Liner Scripts (`/scripts/`)
+
+Quick access to common operations:
+
+- **`dev.sh`** - Start development server with checks
+- **`test.sh`** - Run all tests (unit + Playwright)
+- **`build.sh`** - Production build with validation
+- **`deploy.sh [target]`** - Deploy to Vercel/Fly/Render
+
+Make scripts executable with: `chmod +x scripts/*.sh`
+
+### Deployment Templates (`/deploy/`)
+
+Ready-to-use configurations for multiple platforms:
+
+- **`vercel.json`** - Vercel configuration
+- **`fly.toml`** - Fly.io configuration  
+- **`render.yaml`** - Render.com configuration
+
+See `/deploy/README.md` for detailed deployment instructions.
+
 ## Database Commands
 
 - `pnpm db:generate` - Generate migration files from schema changes
 - `pnpm db:migrate` - Apply pending migrations
+- `pnpm db:seed` - Populate database with initial/test data
+- `pnpm db:drift-check` - Detect schema drift between code and database
+- `pnpm db:er-diagram` - Generate ER diagram documentation
 - `pnpm db:studio` - Open Drizzle Studio for database inspection
 - `pnpm db:push` - Push schema changes directly (for development)
+
+See `/lib/db/README.md` for detailed database documentation.
 
 ## Security Features
 
